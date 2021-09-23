@@ -32,10 +32,11 @@ func main() {
 	fmt.Printf("Canvas Stride: %v\n", canvas.Stride)
 	for i := 0; i < 500; i++ {
 		for j := 0; j < 500; j++ {
-		// 	origin := imgData.At(i, j)
-		// 	r, g, b, a := grayImg.RGBA()
+			origin := imgData.At(i, j)
+			r, g, b, a := origin.RGBA()
+			newColor := color.RGBA{uint8(r/2), uint8(g/2), uint8(b/2), uint8(a)}
 
-			canvas.Set(i, j, color.GrayModel.Convert(imgData.At(i, j)))
+			canvas.Set(i, j, color.GrayModel.Convert(newColor))
 
 		}
 	}
