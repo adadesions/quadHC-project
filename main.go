@@ -41,30 +41,30 @@ func info(img *image.Gray, isShowPix bool) {
 	fmt.Println("====================================")
 }
 
-func ImRead(imgPath string) (*os.File, error) {
-	img, err := os.Open(imgPath)
+func ImReadPNG(imgPath string) (image.Image, error) {
+	imgFile, err := os.Open(imgPath)
 
 	if err != nil {
 		return nil, err
 	}
+	defer imgFile.Close()
+
+	img, err := png.Decode(imgFile)
 
 	return img, nil
 }
 
 func main() {
-	img, err := ImRead("images/sample1.png")
+	img, err := ImReadPNG("images/sample1.png")
 	if err != nil {
 		log.Fatalf("Error occured during reading an image file: %v", err)
 	}
-	defer img.Close()
-
-	imgData, err := png.Decode(img)
 
 	if err != nil {
 		log.Fatalf("Error can't decode image: %v\n", err)
 	}
 
-	canvas := cvtToGray(imgData)
+	canvas := cvtToGray(img)
 	saveToPNG("images/output.png", canvas)
 	info(canvas, false)
 
