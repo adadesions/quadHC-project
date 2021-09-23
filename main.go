@@ -9,6 +9,27 @@ import (
 	"os"
 )
 
+func cvtToGray(img image.Image) *image.RGBA {
+	canvas := image.NewRGBA(img.Bounds())
+	for i := 0; i < 500; i++ {
+		for j := 0; j < 500; j++ {
+			origin := img.At(i, j)
+			canvas.Set(i, j, color.GrayModel.Convert(origin))
+		}
+	}
+
+	return canvas
+}
+
+func saveToPNG(outputPath string, img *image.RGBA) {
+	outputFile, err := os.Create(outputPath)
+	if err != nil {
+		log.Fatalf("Error at create output file: %v", err)
+	}
+	png.Encode(outputFile, img)
+	outputFile.Close()
+}
+
 func main() {
 	img, err := os.Open("images/sample1.png")
 	if err != nil {
@@ -27,26 +48,6 @@ func main() {
 	fmt.Printf("ColorModel: %v\n", imgData.ColorModel())
 	fmt.Printf("At(0,0): %v\n", imgData.At(0, 0))
 
-	// Modify Image
-	canvas := image.NewRGBA(imgData.Bounds())
-	fmt.Printf("Canvas Stride: %v\n", canvas.Stride)
-	for i := 0; i < 500; i++ {
-		for j := 0; j < 500; j++ {
-			origin := imgData.At(i, j)
-			r, g, b, a := origin.RGBA()
-			newColor := color.RGBA{uint8(r/2), uint8(g/2), uint8(b/2), uint8(a)}
-
-			canvas.Set(i, j, color.GrayModel.Convert(newColor))
-
-		}
-	}
-
-	outputFile, err := os.Create("images/output.png")
-	if err != nil {
-		log.Fatalf("Error at create output file: %v", err)
-	}
-
-	png.Encode(outputFile, canvas)
-	outputFile.Close()
-
+	canvas := cvtToGray(imgData)
+	saveToPNG("images/output.png", canvas)
 }
