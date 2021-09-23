@@ -9,8 +9,8 @@ import (
 	"os"
 )
 
-func cvtToGray(img image.Image) *image.RGBA {
-	canvas := image.NewRGBA(img.Bounds())
+func cvtToGray(img image.Image) *image.Gray {
+	canvas := image.NewGray(img.Bounds())
 	for i := 0; i < 500; i++ {
 		for j := 0; j < 500; j++ {
 			origin := img.At(i, j)
@@ -21,7 +21,7 @@ func cvtToGray(img image.Image) *image.RGBA {
 	return canvas
 }
 
-func saveToPNG(outputPath string, img *image.RGBA) {
+func saveToPNG(outputPath string, img *image.Gray) {
 	outputFile, err := os.Create(outputPath)
 	if err != nil {
 		log.Fatalf("Error at create output file: %v", err)
@@ -30,12 +30,32 @@ func saveToPNG(outputPath string, img *image.RGBA) {
 	outputFile.Close()
 }
 
-func main() {
-	img, err := os.Open("images/sample1.png")
+func info(img *image.Gray, isShowPix bool) {
+	fmt.Println("============== Info ================")
+	if isShowPix {
+		fmt.Printf("Gray Data: %v", img)
+	}
+	fmt.Printf("Gray Bound: %v\n", img.Bounds())
+	fmt.Printf("Gray Data: %v\n", img.Pix[0])
+	fmt.Printf("Gray Len: %v\n", len(img.Pix))
+	fmt.Println("====================================")
+}
+
+func ImRead(imgPath string) (*os.File, error) {
+	img, err := os.Open(imgPath)
+
 	if err != nil {
-		log.Fatalf("Error can't open image: %v\n", err)
+		return nil, err
 	}
 
+	return img, nil
+}
+
+func main() {
+	img, err := ImRead("images/sample1.png")
+	if err != nil {
+		log.Fatalf("Error occured during reading an image file: %v", err)
+	}
 	defer img.Close()
 
 	imgData, err := png.Decode(img)
@@ -44,10 +64,8 @@ func main() {
 		log.Fatalf("Error can't decode image: %v\n", err)
 	}
 
-	fmt.Printf("Bounds: %v\n", imgData.Bounds())
-	fmt.Printf("ColorModel: %v\n", imgData.ColorModel())
-	fmt.Printf("At(0,0): %v\n", imgData.At(0, 0))
-
 	canvas := cvtToGray(imgData)
 	saveToPNG("images/output.png", canvas)
+	info(canvas, false)
+
 }
