@@ -59,6 +59,8 @@ func ImReadPNG(imgPath string) (image.Image, error) {
 }
 
 func display(imgPath string) {
+	go startServer()
+	
 	debug := true
 	w := webview.New(debug)
 	defer w.Destroy()
@@ -83,7 +85,6 @@ func startServer() {
 }
 
 func main() {
-	go startServer()
 	// img, err := ImReadPNG("images/sample1.png")
 
 	// imgFile, err := os.Open("data/kaggle_3m/TCGA_CS_4941_19960909/TCGA_CS_4941_19960909_1.tif")
