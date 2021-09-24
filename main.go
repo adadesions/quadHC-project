@@ -11,6 +11,7 @@ import (
 	"os"
 
 	"github.com/webview/webview"
+	tiff "golang.org/x/image/tiff"
 )
 
 func cvtToGray(img image.Image) *image.Gray {
@@ -58,9 +59,9 @@ func ImReadPNG(imgPath string) (image.Image, error) {
 	return img, nil
 }
 
-func display(imgPath string) {
+func display(imgPath string, width, height int) {
 	go startServer()
-	
+
 	debug := true
 	w := webview.New(debug)
 	defer w.Destroy()
@@ -68,7 +69,7 @@ func display(imgPath string) {
 	port := "8100"
 
 	w.SetTitle("QuadHC Experimental")
-	w.SetSize(800, 600, webview.HintNone)
+	w.SetSize(width, height, webview.HintNone)
 	w.Navigate(fmt.Sprintf("%s:%s/images/%s", baseURL, port, imgPath))
 	w.Run()
 }
@@ -87,24 +88,24 @@ func startServer() {
 func main() {
 	// img, err := ImReadPNG("images/sample1.png")
 
-	// imgFile, err := os.Open("data/kaggle_3m/TCGA_CS_4941_19960909/TCGA_CS_4941_19960909_1.tif")
-	imgFile, err := os.Open("images/sample1.png")
+	imgFile, err := os.Open("data/kaggle_3m/TCGA_CS_4941_19960909/TCGA_CS_4941_19960909_1.tif")
+	// imgFile, err := os.Open("images/sample1.png")
 	if err != nil {
 		log.Fatalf("Error occured during reading an image file: %v", err)
 	}
 	defer imgFile.Close()
 	imgFile.Seek(0, 0)
 
-	imgTiff, extension, err := image.Decode(imgFile)
+	imgTiff, err := tiff.Decode(imgFile)
 
 	if err != nil {
 		log.Fatalf("Error can't decode image: %v\n", err)
 	}
 
-	fmt.Printf("Img extension: %v\n", extension)
+	// fmt.Printf("Img extension: %v\n", extension)
 
 	canvas := cvtToGray(imgTiff)
 	saveToPNG("images/output.png", canvas)
 	info(canvas, false)
-	display("output.png")
+	display("output.png", 256, 256)
 }
